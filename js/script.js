@@ -256,9 +256,10 @@ window.addEventListener('DOMContentLoaded', () => {
             const request = new XMLHttpRequest();
             request.open('POST', 'server.php');
 
-            request.setRequestHeader('Content-Type', 'application/json');
+            request.setRequestHeader('Content-Type', 'application/json'); // Only JSON posting
             const formData = new FormData(sendForm);
 
+            // JSON posting
             const objJson = {};
 
             formData.forEach((value, key) => {
