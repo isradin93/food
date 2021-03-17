@@ -151,8 +151,8 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Open modal in 5 minutes
-    //const modalTimerId = setTimeout(openModal, 5000);
+    //Open modal in 5 minutes
+    const modalTimerId = setTimeout(openModal, 50000);
 
     // Open modal when user scrolled page till the end
     const openModalByScroll = () => {
@@ -233,4 +233,56 @@ window.addEventListener('DOMContentLoaded', () => {
         21, // US$
         ".menu .container"
     ).render(); // When we need to use a single time
+
+    // Form
+
+    const forms = document.querySelectorAll('form');
+
+    const message = {
+        loading: 'Loading...',
+        success: 'We will call you back',
+        failure: 'Something went wrong...'
+    };
+
+    const postData = (sendForm) => {
+
+        sendForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+
+            const statusMessage = document.createElement('div');
+            statusMessage.textContent = message.loading;
+            sendForm.append(statusMessage);
+
+            const request = new XMLHttpRequest();
+            request.open('POST', 'server.php');
+
+            request.setRequestHeader('Content-Type', 'application/json');
+            const formData = new FormData(sendForm);
+
+            const objJson = {};
+
+            formData.forEach((value, key) => {
+                objJson[key] = value;
+            });
+
+            request.send(JSON.stringify(objJson));
+
+            request.addEventListener('load', () => {
+                if (request.status === 200) {
+                    console.log(request.response);
+                    statusMessage.textContent = message.success;
+                    sendForm.reset();
+                    setTimeout(() => {
+                        statusMessage.remove();
+                    }, 4000);
+                } else {
+                    statusMessage.textContent = message.failure;
+                }
+            });
+        });
+    };
+
+    forms.forEach(form => {
+        postData(form);
+    });
 });
