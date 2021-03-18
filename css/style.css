@@ -735,3 +735,11 @@ a {
         opacity: 1;
     }
 }
+
+
+/* Style for spinner.svg */
+
+.message-spinner {
+    display: block;
+    margin: 0 auto;
+}
