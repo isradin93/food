@@ -253,24 +253,24 @@ window.addEventListener('DOMContentLoaded', () => {
             statusMessage.textContent = message.loading;
             sendForm.append(statusMessage);
 
-            const request = new XMLHttpRequest();
-            request.open('POST', 'server.php');
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', 'server.php');
 
-            request.setRequestHeader('Content-Type', 'application/json'); // Only JSON posting
+            xhr.setRequestHeader('Content-Type', 'application/json'); // Only JSON posting
             const formData = new FormData(sendForm);
 
             // JSON posting
-            const objJson = {};
+            const object = {};
 
             formData.forEach((value, key) => {
-                objJson[key] = value;
+                object[key] = value;
             });
 
-            request.send(JSON.stringify(objJson));
+            xhr.send(JSON.stringify(object));
 
-            request.addEventListener('load', () => {
-                if (request.status === 200) {
-                    console.log(request.response);
+            xhr.addEventListener('load', () => {
+                if (xhr.status === 200) {
+                    console.log(xhr.response);
                     statusMessage.textContent = message.success;
                     sendForm.reset();
                     setTimeout(() => {
