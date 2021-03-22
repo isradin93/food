@@ -110,8 +110,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // Modal
     const modalTriggerBtn = document.querySelectorAll('[data-modal]'),
-        modal = document.querySelector('.modal'),
-        modalCloseBtn = document.querySelector('[data-close-modal]');
+        modal = document.querySelector('.modal');
 
     // Open modal dialog function
     const openModal = () => {
@@ -134,11 +133,9 @@ window.addEventListener('DOMContentLoaded', () => {
         document.body.style.overflow = '';
     };
 
-    modalCloseBtn.addEventListener('click', closeModal);
-
     // Close modal by clicking the modal field
     modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
+        if (e.target === modal || e.target.getAttribute('data-close-modal') === '') {
             closeModal();
         }
     });
@@ -239,9 +236,9 @@ window.addEventListener('DOMContentLoaded', () => {
     const forms = document.querySelectorAll('form');
 
     const message = {
-        loading: 'Loading...',
-        success: 'We will call you back',
-        failure: 'Something went wrong...'
+        loading: 'img/form/spinner.svg',
+        success: 'Thanks! We will call you back',
+        failure: 'Sorry! Something went wrong...'
     };
 
     const postData = (sendForm) => {
@@ -249,9 +246,11 @@ window.addEventListener('DOMContentLoaded', () => {
         sendForm.addEventListener('submit', (event) => {
             event.preventDefault();
 
-            const statusMessage = document.createElement('div');
-            statusMessage.textContent = message.loading;
-            sendForm.append(statusMessage);
+            const statusMessage = document.createElement('img');
+            statusMessage.src = message.loading;
+
+            statusMessage.classList.add('message-spinner');
+            sendForm.insertAdjacentElement('afterend', statusMessage);
 
             const xhr = new XMLHttpRequest();
             xhr.open('POST', 'server.php');
@@ -271,13 +270,11 @@ window.addEventListener('DOMContentLoaded', () => {
             xhr.addEventListener('load', () => {
                 if (xhr.status === 200) {
                     console.log(xhr.response);
-                    statusMessage.textContent = message.success;
+                    showThanksModal(message.success);
                     sendForm.reset();
-                    setTimeout(() => {
-                        statusMessage.remove();
-                    }, 4000);
+                    statusMessage.remove();
                 } else {
-                    statusMessage.textContent = message.failure;
+                    showThanksModal(message.failure);
                 }
             });
         });
@@ -286,4 +283,31 @@ window.addEventListener('DOMContentLoaded', () => {
     forms.forEach(form => {
         postData(form);
     });
+
+    // Beautify thanks modal
+    const showThanksModal = (message) => {
+        const prevModalDialog = document.querySelector('.modal__dialog');
+
+        prevModalDialog.classList.add('hide');
+        openModal();
+        console.log(prevModalDialog);
+
+        const thanksModal = document.createElement('div');
+        thanksModal.classList.add('modal__dialog');
+        thanksModal.innerHTML = `
+            <div class="modal__content">
+                <div class="modal__close" data-close-modal>×</div>
+                <div class="modal__title">${message}</div>
+            </div>
+        `;
+        document.querySelector('.modal').append(thanksModal);
+        console.log(thanksModal);
+
+        setTimeout(() => {
+            thanksModal.remove();
+            prevModalDialog.classList.add('show');
+            prevModalDialog.classList.remove('hide');
+            closeModal();
+        }, 5000);
+    };
 });
