@@ -252,6 +252,36 @@ window.addEventListener('DOMContentLoaded', () => {
             statusMessage.classList.add('message-spinner');
             sendForm.insertAdjacentElement('afterend', statusMessage);
 
+            const formData = new FormData(sendForm);
+
+            const obj = {};
+
+            // Transfer formData into JSON
+            formData.forEach((value, key) => {
+                obj[key] = value;
+            });
+
+            fetch('server1.php', {
+                    method: 'POST',
+                    headers: { // Only for JSON
+                        'Content-type': 'application/json'
+                    },
+                    body: JSON.stringify(obj)
+                })
+                .then(data => data.text())
+                .then(data => {
+                    console.log(data);
+                    showThanksModal(message.success);
+                    statusMessage.remove();
+                })
+                .catch(() => {
+                    showThanksModal(message.failure);
+                })
+                .finally(() => {
+                    sendForm.reset();
+                });
+
+            /*                  Old XMLHttpRequest() method
             const xhr = new XMLHttpRequest();
             xhr.open('POST', 'server.php');
 
@@ -277,6 +307,7 @@ window.addEventListener('DOMContentLoaded', () => {
                     showThanksModal(message.failure);
                 }
             });
+            */
         });
     };
 
@@ -290,7 +321,6 @@ window.addEventListener('DOMContentLoaded', () => {
 
         prevModalDialog.classList.add('hide');
         openModal();
-        console.log(prevModalDialog);
 
         const thanksModal = document.createElement('div');
         thanksModal.classList.add('modal__dialog');
@@ -301,7 +331,6 @@ window.addEventListener('DOMContentLoaded', () => {
             </div>
         `;
         document.querySelector('.modal').append(thanksModal);
-        console.log(thanksModal);
 
         setTimeout(() => {
             thanksModal.remove();
