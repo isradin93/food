@@ -204,32 +204,57 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    new MenuCard(
-        "img/tabs/vegy.jpg",
-        "vegy",
-        'Меню "Фитнес"',
-        'Меню "Фитнес" - это новый подход к приготовлению блюд: больше свежих овощей и фруктов. Продукт активных и здоровых людей. Это абсолютно новый продукт с оптимальной ценой и высоким качеством!',
-        9, // US$
-        ".menu .container"
-    ).render(); // When we need to use a single time
+    const getResource = async(url) => {
+        const result = await fetch(url);
 
-    new MenuCard(
-        "img/tabs/elite.jpg",
-        "elite",
-        'Меню "Премиум"',
-        'Меню "Премиум" мы используем не только красивый дизайн упаковки, но и качественное исполнение блюд. Красная рыба, морепродукты, фрукты - ресторанное меню без похода в ресторан!',
-        14, // US$
-        ".menu .container"
-    ).render(); // When we need to use a single time
+        if (!result.ok) {
+            throw new Error(`Could not fetch url: ${url}, status: ${result.status}`);
+        }
 
-    new MenuCard(
-        "img/tabs/post.jpg",
-        "post",
-        'Меню "Постное"',
-        'Меню "Постное" - это тщательный подбор ингредиентов: полное отсутствие продуктов животного происхождения, молоко из миндаля, овса, кокоса или гречки, правильное количество белков за счет тофу и импортных вегетарианских стейков.',
-        21, // US$
-        ".menu .container"
-    ).render(); // When we need to use a single time
+        return await result.json();
+    };
+
+    getResource('http://localhost:3000/menu')
+        .then(data => {
+            data.forEach(({
+                img,
+                altimg,
+                title,
+                descr,
+                price
+            }) => {
+                new MenuCard(img, altimg, title, descr, price, '.menu .container').render();
+            });
+        });
+
+    // Without classes
+    // const creatCard = (data) => {
+    //     data.forEach(({
+    //         img,
+    //         altimg,
+    //         title,
+    //         descr,
+    //         price
+    //     }) => {
+    //         const element = document.createElement('div');
+    //         price *= 27;
+    //         element.classList.add('menu__item');
+    //         element.innerHTML = `
+    //             <img src=${img} alt=${altimg}>
+    //             <h3 class="menu__item-subtitle">${title}</h3>
+    //             <div class="menu__item-descr">${descr}</div>
+    //             <div class="menu__item-divider"></div>
+    //             <div class="menu__item-price">
+    //                 <div class="menu__item-cost">Цена:</div>
+    //                 <div class="menu__item-total"><span>${price}</span> грн/день</div>
+    //             </div>
+    //         `;
+    //         document.querySelector('.menu .container').append(element);
+    //     });
+    // };
+
+    // getResource('http://localhost:3000/menu')
+    //     .then(data => creatCard(data));
 
     // Form
 
@@ -241,7 +266,19 @@ window.addEventListener('DOMContentLoaded', () => {
         failure: 'Sorry! Something went wrong...'
     };
 
-    const postData = (sendForm) => {
+    const postData = async(url, data) => {
+        const result = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: data
+        });
+
+        return await result.json();
+    };
+
+    const bindPostData = (sendForm) => {
 
         sendForm.addEventListener('submit', (event) => {
             event.preventDefault();
@@ -254,21 +291,10 @@ window.addEventListener('DOMContentLoaded', () => {
 
             const formData = new FormData(sendForm);
 
-            const obj = {};
-
             // Transfer formData into JSON
-            formData.forEach((value, key) => {
-                obj[key] = value;
-            });
+            const json = JSON.stringify(Object.fromEntries(formData.entries()));
 
-            fetch('server1.php', {
-                    method: 'POST',
-                    headers: { // Only for JSON
-                        'Content-type': 'application/json'
-                    },
-                    body: JSON.stringify(obj)
-                })
-                .then(data => data.text())
+            postData('http://localhost:3000/requests', json)
                 .then(data => {
                     console.log(data);
                     showThanksModal(message.success);
@@ -280,39 +306,11 @@ window.addEventListener('DOMContentLoaded', () => {
                 .finally(() => {
                     sendForm.reset();
                 });
-
-            /*                  Old XMLHttpRequest() method
-            const xhr = new XMLHttpRequest();
-            xhr.open('POST', 'server.php');
-
-            xhr.setRequestHeader('Content-Type', 'application/json'); // Only JSON posting
-            const formData = new FormData(sendForm);
-
-            // JSON posting
-            const object = {};
-
-            formData.forEach((value, key) => {
-                object[key] = value;
-            });
-
-            xhr.send(JSON.stringify(object));
-
-            xhr.addEventListener('load', () => {
-                if (xhr.status === 200) {
-                    console.log(xhr.response);
-                    showThanksModal(message.success);
-                    sendForm.reset();
-                    statusMessage.remove();
-                } else {
-                    showThanksModal(message.failure);
-                }
-            });
-            */
         });
     };
 
     forms.forEach(form => {
-        postData(form);
+        bindPostData(form);
     });
 
     // Beautify thanks modal
@@ -339,8 +337,4 @@ window.addEventListener('DOMContentLoaded', () => {
             closeModal();
         }, 5000);
     };
-
-    fetch('http://localhost:3000/menu')
-        .then(data => data.json())
-        .then(res => console.log(res));
 });
