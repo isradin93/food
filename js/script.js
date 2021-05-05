@@ -41,7 +41,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // Timer
 
-    const deadline = '2021-04-10'; // Deadline of promotions
+    const deadline = '2021-06-10'; // Deadline of promotions
 
     // Function calculates(gets) difference between deadline and current time
     const getTimeRemaining = (endTime) => {
@@ -337,4 +337,60 @@ window.addEventListener('DOMContentLoaded', () => {
             closeModal();
         }, 5000);
     };
+
+    // Slider
+    const slides = document.querySelectorAll('.offer__slide'),
+        prev = document.querySelector('.offer__slider-prev'),
+        next = document.querySelector('.offer__slider-next'),
+        current = document.getElementById('current'),
+        total = document.getElementById('total');
+
+    let currentSlide = 1;
+
+    const addToTotalSlide = () => {
+        if (slides.length < 10) {
+            total.textContent = `0${slides.length}`;
+        } else {
+            total.textContent = slides.length;
+        }
+    };
+
+    addToTotalSlide();
+
+    const showCurrentSlide = () => {
+        if (slides.length < 10) {
+            current.textContent = `0${currentSlide}`;
+        } else {
+            current.textContent = currentSlide;
+        }
+    };
+
+    const showSlides = (slideIndex) => {
+        if (slideIndex > slides.length) {
+            currentSlide = 1;
+        }
+
+        if (slideIndex < 1) {
+            currentSlide = slides.length;
+        }
+
+        slides.forEach(slide => slide.style.display = 'none');
+        slides[currentSlide - 1].style.display = 'block';
+
+        showCurrentSlide();
+    };
+
+    const plusSlides = (num) => {
+        showSlides(currentSlide += num);
+    };
+
+    prev.addEventListener('click', () => {
+        plusSlides(-1);
+    });
+
+    next.addEventListener('click', () => {
+        plusSlides(1);
+    });
+
+    showSlides(currentSlide);
 });
