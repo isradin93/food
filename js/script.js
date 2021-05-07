@@ -343,21 +343,30 @@ window.addEventListener('DOMContentLoaded', () => {
         prev = document.querySelector('.offer__slider-prev'),
         next = document.querySelector('.offer__slider-next'),
         current = document.getElementById('current'),
-        total = document.getElementById('total');
+        total = document.getElementById('total'),
+        slidesWrapper = document.querySelector('.offer__slider-wrapper'),
+        slidesField = document.querySelector('.offer__slider-inner'),
+        slidesWrapperWidth = window.getComputedStyle(slidesWrapper).width;
 
     let currentSlide = 1;
 
-    const addToTotalSlide = () => {
+    // Set offset(смещение,отступ) to shift slides
+    let offset = 0;
+
+    // Check if slider less than 10
+    const addZeroToSlide = () => {
         if (slides.length < 10) {
+            current.textContent = `0${currentSlide}`;
             total.textContent = `0${slides.length}`;
         } else {
+            current.textContent = currentSlide;
             total.textContent = slides.length;
         }
     };
 
-    addToTotalSlide();
+    addZeroToSlide();
 
-    const showCurrentSlide = () => {
+    const getCurrentSlide = () => {
         if (slides.length < 10) {
             current.textContent = `0${currentSlide}`;
         } else {
@@ -365,32 +374,61 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const showSlides = (slideIndex) => {
-        if (slideIndex > slides.length) {
-            currentSlide = 1;
-        }
+    const addAdditionalLayout = () => {
+        // Set width to slidesField  
+        slidesField.style.width = 100 * slides.length + '%';
 
-        if (slideIndex < 1) {
-            currentSlide = slides.length;
-        }
+        // Set all slides inside slidesField to horizontal line
+        slidesField.style.display = 'flex';
 
-        slides.forEach(slide => slide.style.display = 'none');
-        slides[currentSlide - 1].style.display = 'block';
+        // Set transition to all slides
+        slidesField.style.transition = '0.5s all';
 
-        showCurrentSlide();
+        // Limit slides inside slidesWrapper
+        slidesWrapper.style.overflow = 'hidden';
+
+        // Put all slides inside slidesField
+        slides.forEach(slide => slide.style.width = slidesWrapperWidth);
     };
 
-    const plusSlides = (num) => {
-        showSlides(currentSlide += num);
-    };
-
-    prev.addEventListener('click', () => {
-        plusSlides(-1);
-    });
+    addAdditionalLayout();
 
     next.addEventListener('click', () => {
-        plusSlides(1);
+        // If slides flipped to the end
+        if (offset === +slidesWrapperWidth.slice(0, slidesWrapperWidth.length - 2) * (slides.length - 1)) {
+            offset = 0;
+        } else {
+            offset += +slidesWrapperWidth.slice(0, slidesWrapperWidth.length - 2);
+        }
+
+        // Move, shift slides 
+        slidesField.style.transform = `translateX(-${offset}px)`;
+
+        if (currentSlide === slides.length) {
+            currentSlide = 1;
+        } else {
+            currentSlide++;
+        }
+
+        getCurrentSlide();
     });
 
-    showSlides(currentSlide);
+    prev.addEventListener('click', () => {
+        // If its first slider
+        if (offset === 0) {
+            offset = +slidesWrapperWidth.slice(0, slidesWrapperWidth.length - 2) * (slides.length - 1);
+        } else {
+            offset -= +slidesWrapperWidth.slice(0, slidesWrapperWidth.length - 2);
+        }
+
+        slidesField.style.transform = `translateX(-${offset}px)`;
+
+        if (currentSlide === 1) {
+            currentSlide = slides.length;
+        } else {
+            currentSlide--;
+        }
+
+        getCurrentSlide();
+    });
 });
