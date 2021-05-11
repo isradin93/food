@@ -339,13 +339,14 @@ window.addEventListener('DOMContentLoaded', () => {
     };
 
     // Slider
-    const slides = document.querySelectorAll('.offer__slide'),
-        prev = document.querySelector('.offer__slider-prev'),
+    const slider = document.querySelector('.offer__slider'),
+        slidesWrapper = document.querySelector('.offer__slider-wrapper'),
+        slidesField = slidesWrapper.querySelector('.offer__slider-inner'),
+        slides = slidesWrapper.querySelectorAll('.offer__slide'),
         next = document.querySelector('.offer__slider-next'),
+        prev = document.querySelector('.offer__slider-prev'),
         current = document.getElementById('current'),
         total = document.getElementById('total'),
-        slidesWrapper = document.querySelector('.offer__slider-wrapper'),
-        slidesField = document.querySelector('.offer__slider-inner'),
         slidesWrapperWidth = window.getComputedStyle(slidesWrapper).width;
 
     let currentSlide = 1;
@@ -374,24 +375,80 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const addAdditionalLayout = () => {
-        // Set width to slidesField  
-        slidesField.style.width = 100 * slides.length + '%';
+    // Set width to slidesField  
+    slidesField.style.width = 100 * slides.length + '%';
 
-        // Set all slides inside slidesField to horizontal line
-        slidesField.style.display = 'flex';
+    // Set all slides inside slidesField to horizontal line
+    slidesField.style.display = 'flex';
 
-        // Set transition to all slides
-        slidesField.style.transition = '0.5s all';
+    // Set transition to all slides
+    slidesField.style.transition = '0.5s all';
 
-        // Limit slides inside slidesWrapper
-        slidesWrapper.style.overflow = 'hidden';
+    // Limit slides inside slidesWrapper
+    slidesWrapper.style.overflow = 'hidden';
 
-        // Put all slides inside slidesField
-        slides.forEach(slide => slide.style.width = slidesWrapperWidth);
+    // Put all slides inside slidesField
+    slides.forEach(slide => slide.style.width = slidesWrapperWidth);
+
+    // Put all dots bottom 
+    slider.style.position = 'relative';
+
+    // Create empty array to be wrapper for dot - li
+    const dots = [];
+
+    // Create indicators - ol
+    const indicators = document.createElement('ol');
+    indicators.style.cssText = `
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 15;
+        display: flex;
+        justify-content: center;
+        margin-right: 15%;
+        margin-left: 15%;
+        list-style: none;
+    `;
+    slider.append(indicators);
+
+    // Create dot - li
+    for (let i = 0; i < slides.length; i++) {
+        const dot = document.createElement('li');
+
+        // Set attribute to dots, starting with 1
+        dot.setAttribute('data-slide-to', i + 1);
+        dot.style.cssText = `
+            box-sizing: content-box;
+            flex: 0 1 auto;
+            width: 30px;
+            height: 6px;
+            margin-right: 3px;
+            margin-left: 3px;
+            cursor: pointer;
+            background-color: #fff;
+            background-clip: padding-box;
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+            opacity: .5;
+            transition: opacity .6s ease;
+        `;
+        // Create active dot
+        if (i === 0) {
+            dot.style.opacity = 1;
+        }
+
+        indicators.append(dot);
+        dots.push(dot);
+    }
+
+    // Flip active dot with arrows & numbers
+    const slideActiveDot = () => {
+        dots.forEach(dot => dot.style.opacity = 0.5);
+        dots[currentSlide - 1].style.opacity = 1;
     };
 
-    addAdditionalLayout();
+    slideActiveDot();
 
     next.addEventListener('click', () => {
         // If slides flipped to the end
@@ -411,6 +468,8 @@ window.addEventListener('DOMContentLoaded', () => {
         }
 
         getCurrentSlide();
+
+        slideActiveDot();
     });
 
     prev.addEventListener('click', () => {
@@ -430,5 +489,21 @@ window.addEventListener('DOMContentLoaded', () => {
         }
 
         getCurrentSlide();
+
+        slideActiveDot();
+    });
+
+    // Flip slide by clicking indicators
+    dots.forEach(dot => {
+        dot.addEventListener('click', (e) => {
+            const slideTo = e.target.getAttribute('data-slide-to');
+
+            currentSlide = slideTo;
+            offset = +slidesWrapperWidth.slice(0, slidesWrapperWidth.length - 2) * (slideTo - 1);
+
+            slidesField.style.transform = `translateX(-${offset}px)`;
+            getCurrentSlide();
+            slideActiveDot();
+        });
     });
 });
