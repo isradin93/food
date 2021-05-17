@@ -482,4 +482,83 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // Calc
+    const result = document.querySelector('.calculating__result span');
+    let sex = 'female', // default
+        weight, height, age,
+        ratio = 1.375; // default
+
+    // Function to calculate the base rate of calories
+    const calcTotal = () => {
+        // If one of conditions false we don't calculate
+        if (!sex || !weight || !height || !age || !ratio) {
+            result.textContent = '____';
+            return;
+        }
+
+        // Formula for calc the base rate of calories for female & male
+        if (sex === 'female') {
+            result.textContent = Math.round((447.6 + (9.2 * weight) + (3.1 * height) - (4.3 * age)) * ratio);
+        } else {
+            result.textContent = Math.round((88.36 + (13.4 * weight) + (4.8 * height) - (5.7 * age)) * ratio);
+        }
+    };
+    // Call func inside below functions
+    calcTotal();
+
+    // Get data from 1-block(Gender) @ 3-block(Physical activity)
+    const getStaticInfo = (parenTselector, activeClass) => {
+        const elements = document.querySelectorAll(`${parenTselector} div`);
+
+        elements.forEach(element => {
+            element.addEventListener('click', (e) => {
+
+                // Getting data from 3-block by id
+                if (e.target.getAttribute('data-ratio')) {
+                    ratio = +e.target.getAttribute('data-ratio');
+                } else {
+                    //Getting data from 1-block by data attr.
+                    sex = e.target.getAttribute('id');
+                }
+                // Remove all active class
+                elements.forEach(element => {
+                    element.classList.remove(activeClass);
+                });
+
+                // Add active class element that we click
+                e.target.classList.add(activeClass);
+
+                // Call func every time when we have changes on page
+                calcTotal();
+            });
+        });
+    };
+    // Call func 2 times cause we have 2 data block
+    getStaticInfo('#gender', 'calculating__choose-item_active');
+    getStaticInfo('.calculating__choose_big', 'calculating__choose-item_active');
+
+    // Get data from 2-block (inputs)
+    const getDynamicInfo = (selector) => {
+        const input = document.querySelector(selector);
+
+        input.addEventListener('input', () => {
+            switch (input.getAttribute('id')) {
+                case 'height':
+                    height = +input.value;
+                    break;
+                case 'weight':
+                    weight = +input.value;
+                    break;
+                case 'age':
+                    age = +input.value;
+                    break;
+            }
+            // Call func every time when we have changes on page
+            calcTotal();
+        });
+    };
+    // Call func 3 times cause we have 3 input block
+    getDynamicInfo('#height');
+    getDynamicInfo('#weight');
+    getDynamicInfo('#age');
 });
