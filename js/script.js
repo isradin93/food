@@ -484,9 +484,45 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // Calc
     const result = document.querySelector('.calculating__result span');
-    let sex = 'female', // default
-        weight, height, age,
-        ratio = 1.375; // default
+    let sex, weight, height, age, ratio;
+
+    // If localStorage has default values (sex = 'female')
+    if (localStorage.getItem('sex')) {
+        sex = localStorage.getItem('sex');
+    } else {
+        // Else set default values (sex = 'female')
+        sex = 'female';
+        localStorage.setItem('sex', 'female');
+    }
+
+    // If localStorage has default values (ratio = 1.375)
+    if (localStorage.getItem('ratio')) {
+        ratio = localStorage.getItem('ratio');
+    } else {
+        // Else set default values (ratio = 1.375)
+        ratio = 1.375;
+        localStorage.setItem('ratio', 1.375);
+    }
+
+    // Match active class with localStorage values
+    const initLocalSettings = (selector, activeClass) => {
+        const elements = document.querySelectorAll(selector);
+
+        elements.forEach(element => {
+            element.classList.remove(activeClass);
+
+            if (element.getAttribute('id') === localStorage.getItem('sex')) {
+                element.classList.add(activeClass);
+            }
+
+            if (element.getAttribute('data-ratio') === localStorage.getItem('ratio')) {
+                element.classList.add(activeClass);
+            }
+        });
+    };
+
+    initLocalSettings('#gender div', 'calculating__choose-item_active');
+    initLocalSettings('.calculating__choose_big div', 'calculating__choose-item_active');
 
     // Function to calculate the base rate of calories
     const calcTotal = () => {
@@ -507,18 +543,21 @@ window.addEventListener('DOMContentLoaded', () => {
     calcTotal();
 
     // Get data from 1-block(Gender) @ 3-block(Physical activity)
-    const getStaticInfo = (parenTselector, activeClass) => {
-        const elements = document.querySelectorAll(`${parenTselector} div`);
+    const getStaticInfo = (selector, activeClass) => {
+        const elements = document.querySelectorAll(selector);
 
         elements.forEach(element => {
             element.addEventListener('click', (e) => {
+                let target = e.target;
 
                 // Getting data from 3-block by id
-                if (e.target.getAttribute('data-ratio')) {
-                    ratio = +e.target.getAttribute('data-ratio');
+                if (target.getAttribute('data-ratio')) {
+                    ratio = +target.getAttribute('data-ratio');
+                    localStorage.setItem('ratio', +target.getAttribute('data-ratio'));
                 } else {
                     //Getting data from 1-block by data attr.
-                    sex = e.target.getAttribute('id');
+                    sex = target.getAttribute('id');
+                    localStorage.setItem('sex', target.getAttribute('id'));
                 }
                 // Remove all active class
                 elements.forEach(element => {
@@ -526,7 +565,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 });
 
                 // Add active class element that we click
-                e.target.classList.add(activeClass);
+                target.classList.add(activeClass);
 
                 // Call func every time when we have changes on page
                 calcTotal();
@@ -534,14 +573,21 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     };
     // Call func 2 times cause we have 2 data block
-    getStaticInfo('#gender', 'calculating__choose-item_active');
-    getStaticInfo('.calculating__choose_big', 'calculating__choose-item_active');
+    getStaticInfo('#gender div', 'calculating__choose-item_active');
+    getStaticInfo('.calculating__choose_big div', 'calculating__choose-item_active');
 
     // Get data from 2-block (inputs)
     const getDynamicInfo = (selector) => {
         const input = document.querySelector(selector);
 
         input.addEventListener('input', () => {
+            // User should type only digits
+            if (input.value.match(/\D/g)) {
+                input.style.border = '2px solid red';
+            } else {
+                input.style.border = 'none';
+            }
+
             switch (input.getAttribute('id')) {
                 case 'height':
                     height = +input.value;
