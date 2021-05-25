@@ -1,33 +1,38 @@
-const modal = () => {
-    // Modal
-    const modalTriggerBtn = document.querySelectorAll('[data-modal]'),
-        modal = document.querySelector('.modal');
+const openModal = (modalSelector, modalTimerId) => {
+    const modal = document.querySelector(modalSelector);
 
-    // Open modal dialog function
-    const openModal = () => {
-        modal.classList.add('show');
-        modal.classList.remove('hide');
-        //modal.classList.toggle('show');  // Toggle version
-        document.body.style.overflow = 'hidden';
+    modal.classList.add('show');
+    modal.classList.remove('hide');
+    //modal.classList.toggle('show');  // Toggle version
+    document.body.style.overflow = 'hidden';
+
+    if (modalTimerId) {
         clearInterval(modalTimerId); // To not open modal after open by user
-    };
+    }
+};
+
+const closeModal = (modalSelector) => {
+    const modal = document.querySelector(modalSelector);
+
+    modal.classList.add('hide');
+    modal.classList.remove('show');
+    // modal.classList.toggle('show');  // Toggle version
+    document.body.style.overflow = '';
+};
+
+const modal = (triggerSelector, modalSelector, modalTimerId) => {
+    // Modal
+    const modalTriggerBtn = document.querySelectorAll(triggerSelector),
+        modal = document.querySelector(modalSelector);
 
     modalTriggerBtn.forEach(btn => {
-        btn.addEventListener('click', openModal);
+        btn.addEventListener('click', () => openModal(modalSelector, modalTimerId));
     });
-
-    // Close modal dialog function
-    const closeModal = () => {
-        modal.classList.add('hide');
-        modal.classList.remove('show');
-        // modal.classList.toggle('show');  // Toggle version
-        document.body.style.overflow = '';
-    };
 
     // Close modal by clicking the modal field
     modal.addEventListener('click', (e) => {
         if (e.target === modal || e.target.getAttribute('data-close-modal') === '') {
-            closeModal();
+            closeModal(modalSelector);
         }
     });
 
@@ -35,17 +40,14 @@ const modal = () => {
     window.addEventListener('keydown', (event) => {
         if (event.code === 'Escape' && modal.classList.contains('show')) {
             // Close modal by Esc only  when modal dialog is open
-            closeModal();
+            closeModal(modalSelector);
         }
     });
-
-    //Open modal in 5 minutes
-    const modalTimerId = setTimeout(openModal, 50000);
 
     // Open modal when user scrolled page till the end
     const openModalByScroll = () => {
         if (window.pageYOffset + document.documentElement.clientHeight >= document.documentElement.scrollHeight) {
-            openModal();
+            openModal(modalSelector, modalTimerId);
             window.removeEventListener('scroll', openModalByScroll);
         }
     };
@@ -53,4 +55,8 @@ const modal = () => {
     window.addEventListener('scroll', openModalByScroll);
 };
 
-module.exports = modal;
+export default modal;
+export {
+    openModal,
+    closeModal
+};

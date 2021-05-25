@@ -1,8 +1,8 @@
-const tabs = () => {
+const tabs = (tabsContentSelector, tabsParentSelector, tabsSelector, activeClass) => {
     // Tabs
-    const tabsContent = document.querySelectorAll('.tabcontent'),
-        tabsParent = document.querySelector('.tabheader__items'),
-        tabs = tabsParent.querySelectorAll('.tabheader__item');
+    const tabsContent = document.querySelectorAll(tabsContentSelector),
+        tabsParent = document.querySelector(tabsParentSelector),
+        tabs = tabsParent.querySelectorAll(tabsSelector);
 
     const hideTabsContent = () => {
         tabsContent.forEach(tabContent => {
@@ -11,7 +11,7 @@ const tabs = () => {
         });
 
         tabs.forEach(tab => {
-            tab.classList.remove('tabheader__item_active');
+            tab.classList.remove(activeClass);
         });
     };
 
@@ -19,7 +19,7 @@ const tabs = () => {
         tabsContent[i].classList.add('show', 'fade');
         tabsContent[i].classList.remove('hide');
 
-        tabs[i].classList.add('tabheader__item_active');
+        tabs[i].classList.add(activeClass);
     };
 
     hideTabsContent();
@@ -28,7 +28,7 @@ const tabs = () => {
     tabsParent.addEventListener('click', (event) => {
         const eventTarget = event.target;
 
-        if (eventTarget && eventTarget.classList.contains('tabheader__item')) {
+        if (eventTarget && eventTarget.classList.contains(tabsSelector.slice(1))) {
             tabs.forEach((tab, i) => {
                 if (eventTarget === tab) {
                     hideTabsContent();
@@ -39,4 +39,4 @@ const tabs = () => {
     });
 };
 
-module.exports = tabs;
+export default tabs;

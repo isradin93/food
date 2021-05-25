@@ -1,7 +1,4 @@
-const timer = () => {
-    // Timer
-
-    const deadline = '2021-06-10'; // Deadline of promotions
+const timer = (id, deadline) => {
 
     // Function calculates(gets) difference between deadline and current time
     const getTimeRemaining = (endTime) => {
@@ -66,7 +63,7 @@ const timer = () => {
         }
     };
 
-    setClock('.timer', deadline);
+    setClock(id, deadline);
 };
 
-module.exports = timer;
+export default timer;
